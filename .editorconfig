@@ -1,0 +1,33 @@
+# http://editorconfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Set style for every file
+[*]
+
+# Unix-style newlines with a newline ending
+end_of_line = lf
+insert_final_newline = true
+
+# Space indentation with size 4
+indent_style = space
+indent_size = 4
+
+# UTF-8 encoding
+charset = utf-8
+
+# Enable traling whitespace
+trim_trailing_whitespace = true
+
+# Disable traling whitespace for Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# Change indentation for json and yml files
+[*.{json,yml}]
+indent_size = 2
+
+# Hard line wrapping at 99 chars
+[*.py]
+max_line_length = 99
