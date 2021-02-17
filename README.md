@@ -28,7 +28,7 @@ cp -r notebook YOUR_JUPYTER_FOLDER
 ```bash
 cd server
 pip install -r requirements.txt
-docker run -p "27017:27017" -e MONGO_INITDB_DATABASE=notebook mongo:4.4
+docker-compose up -d mongodb
 python index.py
 ```
 
@@ -38,9 +38,7 @@ To run the server in production mode instead:
 
 ```bash
 cd server
-docker build -t medialab-server .
-docker run -p "27017:27017" -e MONGO_INITDB_DATABASE=notebook --net=medialab mongo:4.4
-docker run -p 8080:8080 -e MONGODB_URI=mongodb://mongodb:27017/ --net=medialab medialab-server
+docker-compose up -d
 ```
 
 3. Run the example notebook `example_notebook.ipynb`.
