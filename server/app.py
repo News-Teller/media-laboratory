@@ -24,7 +24,8 @@ class CustomDash(Dash):
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>{title}</title>
                 <meta name="description" content="{description}">
-                {favicon}
+                <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+                <link rel="alternate icon" href="/assets/favicon.ico" />
                 {css}
             </head>
             <body>
