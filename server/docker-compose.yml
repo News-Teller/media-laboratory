@@ -15,6 +15,7 @@ services:
       - net
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/
+      - CACHE_DEFAULT_TIMEOUT=1800 # 30 mins
 
   mongodb:
     image: mongo:4.4

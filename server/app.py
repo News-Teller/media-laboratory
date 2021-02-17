@@ -1,5 +1,11 @@
+# Generic
+import os
+
 # Plotly's Dash
 from dash import Dash
+
+# Cache
+from flask_caching import Cache
 
 class CustomDash(Dash):
     """Custom Dash app which overrides the default HTML content. """
@@ -39,3 +45,15 @@ class CustomDash(Dash):
 
 app = CustomDash(__name__, suppress_callback_exceptions=True)
 server = app.server
+
+# Use Flask-Caching library to save callback results in a shared memory
+TIMEOUT = int(os.getenv('CACHE_DEFAULT_TIMEOUT', 60 * 2))   # in seconds
+cache = Cache(app.server, config={
+    'DEBUG': True if os.getenv('DEBUG') == 'True' else False,
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DEFAULT_TIMEOUT': TIMEOUT,
+    'CACHE_DIR': '.cache'
+})
+
+# Alias cache decorator here for clarity
+mycache = cache.memoize(timeout=TIMEOUT)

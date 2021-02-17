@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output
 from flask import redirect
 
 # our module
-from app import app, server
+from app import app, server, mycache
 from database import Database, DatabaseError
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ app.layout = html.Div([
 index_layout = html.Div('It works!')
 
 @app.callback(Output('page-content', 'children'), Input('url', 'pathname'))
+@mycache
 def display_page(pathname):
     if pathname == '/':
         return index_layout
@@ -53,4 +54,6 @@ def display_page(pathname):
 
 # Run this on developing/test
 if __name__ == '__main__':
-    app.run_server()
+    debug = True if os.getenv('DEBUG') == 'True' else False
+
+    app.run_server(debug=debug)
