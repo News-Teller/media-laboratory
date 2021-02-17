@@ -27,7 +27,7 @@ class Database:
     __RAW_LAYOUT_SIZE_WARNING = 40   # kilobytes
 
     def __init__(self, uri: Optional[str] = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/')):
-        self.client = MongoClient(uri, serverSelectionTimeoutMS=1000)
+        self.client = MongoClient(uri, serverSelectionTimeoutMS=5000)
         self.db = self.client[self.__DB_NAME]
 
     def store_visualisation(self, title: str, description: str, author: str, layout: dash_component_type,
