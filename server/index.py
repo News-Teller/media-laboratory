@@ -1,5 +1,6 @@
 # Generic
 import os
+import logging
 
 # Plotly's Dash
 import dash_core_components as dcc
@@ -9,10 +10,13 @@ from flask import redirect
 
 # our module
 from app import app, server
-from database import Database
+from database import Database, DatabaseError
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(os.getenv('LOG_LEVEL', 'INFO').upper())
 
-# Create database
+# Create the database
 db = Database()
 
 # Webpage main layout
@@ -21,10 +25,8 @@ app.layout = html.Div([
     html.Div(id='page-content')
 ])
 
-# Layout for the index page, just displays a working message
-index_layout = html.Div([
-    html.H3('It works!'),
-])
+# On the index page just show a working message
+index_layout = html.Div('It works!')
 
 @app.callback(Output('page-content', 'children'), Input('url', 'pathname'))
 def display_page(pathname):
@@ -34,21 +36,21 @@ def display_page(pathname):
     # url example: 'http://example.com/:uid'
     visualisation_uid = pathname[1:]
 
-    record = db.load_visualisation(visualisation_uid)
-    if record:
-        app.title = record['title']
-        app.description = record['description']
+    try:
+        record = db.load_visualisation(visualisation_uid)
+        if record:
+            app.title = record['title']
+            app.description = record['description']
 
-        return record['layout']
+            return record['layout']
 
-    else:
+        else:
+            return '404'
+
+    except DatabaseError as err:
+        logger.warning(err)
         return '404'
 
 # Run this on developing/test
 if __name__ == '__main__':
-    debug = True if os.getenv('DASH_DEBUG_MODE') == 'True' else False
-
-    app.run_server(
-        host=os.getenv('DASH_HOST'),
-        debug=debug
-    )
+    app.run_server()

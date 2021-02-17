@@ -7,12 +7,16 @@ from datetime import datetime
 
 # Connection with Mongo
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
+from pymongo.errors import ConnectionFailure, PyMongoError
 import bson
 
 # Plotly's Dash
 import dash
 dash_component_type = dash.development.base_component.ComponentMeta
+
+
+# Create an alias for exceptions
+DatabaseError = PyMongoError
 
 class Database:
     """Allows to store and retrieve a visualisation on a Mongo database. """
@@ -23,7 +27,7 @@ class Database:
     __RAW_LAYOUT_SIZE_WARNING = 40   # kilobytes
 
     def __init__(self, uri: Optional[str] = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/')):
-        self.client = MongoClient(uri)
+        self.client = MongoClient(uri, serverSelectionTimeoutMS=1000)
         self.db = self.client[self.__DB_NAME]
 
     def store_visualisation(self, title: str, description: str, author: str, layout: dash_component_type,
