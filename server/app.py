@@ -44,6 +44,7 @@ class CustomDash(Dash):
         '''.format(**kwargs)
 
 app = CustomDash(__name__, suppress_callback_exceptions=True)
+app.title = 'Media-Laboratory'
 server = app.server
 
 # Use Flask-Caching library to save callback results in a shared memory
