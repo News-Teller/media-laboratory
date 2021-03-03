@@ -1,5 +1,6 @@
 # Generic
 from urllib.parse import quote
+from uuid import uuid4
 
 # Data handling
 import pandas as pd
@@ -29,3 +30,19 @@ def is_dataframe_large(df: pd.DataFrame) -> bool:
     :rtype: bool
     """
     return df.empty or df.shape[0] >= 15000
+
+def generate_uid():
+    """Generate a 12-char uuid (universally unique identifier).
+
+    :return: uuid
+    :rtype: str
+    """
+    # Note: from our tests, we experienced 0 collision in 1M draws of 12-char uuids
+    uuid_str = str(uuid4())
+    return uuid_str[:8] + uuid_str[9:13]
+
+def is_documented_by(original):
+  def wrapper(target):
+    target.__doc__ = original.__doc__
+    return target
+  return wrapper

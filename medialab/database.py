@@ -1,7 +1,7 @@
 # Generic
 import os
+import logging
 import pickle
-from uuid import uuid4
 from typing import Optional, Any
 from datetime import datetime
 
@@ -14,9 +14,19 @@ import bson
 import dash
 dash_component_type = dash.development.base_component.ComponentMeta
 
+from .utils import generate_uid
 
-# Create an alias for exceptions
-DatabaseError = PyMongoError
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(os.getenv('LOG_LEVEL', 'WARNING').upper())
+
+
+class DatabaseError(Exception):
+    """Base class for database exceptions"""
+
+class UIDAlreadyExists(DatabaseError):
+    """Raised when the UID already exists on the database."""
+
 
 class Database:
     """Allows to store and retrieve a visualisation on a Mongo database. """
@@ -30,40 +40,42 @@ class Database:
         self.client = MongoClient(uri, serverSelectionTimeoutMS=5000)
         self.db = self.client[self.__DB_NAME]
 
-    def store_visualisation(self, title: str, description: str, author: str, layout: dash_component_type,
-        public: bool=True, uid: Optional[str] = None) -> Optional[str]:
+    def store_visualisation(self, uid: str, title: str, description: str, author: str,
+        layout: dash_component_type, active: bool = True) -> bool:
         """Stores a visualisation onto the database in order to be retrieved later on the web.
 
-        :param title: visualisation's title which will appear in the HTML title tag
+        :param uid: visualisation's unique identifier
+        :type uid: str
+        :param title: visualisation's title
         :type title: str
-        :param description: brief description which will appear in the HTML description metatag
+        :param description: brief description
         :type description: str
         :param author: author of the visualisation
         :type author: str
-        :param layout: actual visualisation, in the form of a Dash layout
+        :param layout: Dash's layout containing the visualisation
         :type layout: dash_component_type
-        :param public: if the visualisation can be accessible publicly on the web, defaults to True
-        :type public: bool, optional
-        :param name: visualisation's identifier, used to override an exisiting visualisation
-        :type name: Optional[str]
-        :return: the unique identifier for the visualisation if it was stored successfully, `None` otherwise
-        :rtype: Optional[str]
+        :param active: set this to `False` will cause the visualisation to be purged
+            from the database after 24h
+        :type active: bool
+
+        :raises UIDAlreadyExists: UID is already registered from another author
+
+        :return: True if the visualisation was stored successfully.
+        :rtype: bool
         """
         collection = self.db[self.__COLLECTION_NAME]
 
-        if not collection:
-            return None
+        # Prevent one author to override another author's visualisation
+        record = collection.find_one({'uid': uid})
+        if record and (author != record['author']):
+            raise UIDAlreadyExists(f'UID <{uid}> is already registered from another author!')
 
         # Display warning message for large layouts
         raw_layout = self._serialise(layout)
         if len(raw_layout) // 1024 >= self.__RAW_LAYOUT_SIZE_WARNING:
             msg = f'Warning: serialised layout is larger than {self.__RAW_LAYOUT_SIZE_WARNING} KB. '
             msg += 'Large layouts will incrase the loading time of the final webpage.'
-            print(msg)
-
-        # Generate application identifier
-        if not uid:
-            uid = self._generate_uid()
+            logger.warning(msg)
 
         doc = {
             'uid': uid,
@@ -71,12 +83,13 @@ class Database:
             'description': description,
             'author': author,
             'raw': bson.Binary(raw_layout),
-            'public': public,
+            'createdAt': datetime.utcnow(),
+            'active': active
         }
 
         res = collection.update_one({'uid': uid}, {'$set': doc}, upsert=True)
 
-        return uid if res else None
+        return bool(res)
 
     def load_visualisation(self, uid: str) -> Optional[dict]:
         """Inverse process of storing: retrieve a visualisation from the database
@@ -121,13 +134,6 @@ class Database:
 
         except ConnectionFailure:
             return False
-
-    @classmethod
-    def _generate_uid(cls):
-        # Generate uuid of 8 chars
-        # Note: from our tests, we experienced 0 collision in 1M draws of 12-char uuids
-        uuid_str = str(uuid4())
-        return uuid_str[:8] + uuid_str[9:13]
 
     @classmethod
     def _serialise(cls, data: Any) -> bytes:
