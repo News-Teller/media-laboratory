@@ -9,6 +9,7 @@ volumes:
 services:
   server:
     build: .
+    container_name: server
     ports:
       - "8080:8080"
     networks:
@@ -19,6 +20,7 @@ services:
 
   mongodb:
     image: mongo:4.4
+    container_name: mongodb
     command: --quiet
     ports:
       - "27017:27017"
@@ -28,3 +30,4 @@ services:
       - MONGO_INITDB_DATABASE=notebook
     volumes:
       - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
