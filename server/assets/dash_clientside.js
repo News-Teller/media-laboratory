@@ -1,7 +1,6 @@
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
         setMeta: function(title, desc) {
-            console.log('ff ', title, desc);
             if (title) {
                 document.title = title;
                 document.querySelector('meta[property="og:title"]').setAttribute('content', title)
