@@ -48,6 +48,7 @@ app = CustomDash(
     title=title,
     meta_tags=meta_tags,
     update_title='Loading...',
+    serve_locally=False,
     suppress_callback_exceptions=True
 )
 server = app.server
