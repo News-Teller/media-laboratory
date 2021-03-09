@@ -6,6 +6,8 @@ import logging
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, ClientsideFunction
+import dash_bootstrap_components
+import dash_simple_map
 from flask import redirect
 
 # our module

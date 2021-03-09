@@ -3,6 +3,7 @@ import os
 
 # Plotly's Dash
 from dash import Dash
+import dash_bootstrap_components as dbc
 
 # Cache
 from flask_caching import Cache
@@ -49,6 +50,7 @@ app = CustomDash(
     meta_tags=meta_tags,
     update_title='Loading...',
     serve_locally=False,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
     suppress_callback_exceptions=True
 )
 server = app.server
