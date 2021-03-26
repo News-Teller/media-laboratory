@@ -8,6 +8,8 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, ClientsideFunction
 import dash_bootstrap_components
 import dash_simple_map
+import dash_table
+import dash_cytoscape as cyto
 from flask import redirect
 
 # our module
