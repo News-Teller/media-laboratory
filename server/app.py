@@ -51,6 +51,7 @@ app = CustomDash(
     update_title='Loading...',
     serve_locally=False,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
+    external_scripts=['https://platform.twitter.com/widgets.js'],
     suppress_callback_exceptions=True
 )
 server = app.server
