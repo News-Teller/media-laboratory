@@ -12,6 +12,7 @@ FAKE_VIZ_PARAMS = {
     'title': 'test app',
     'app_factory': create_app,
     'locked': False,
+    'tags': ['tag1']
 }
 FAKE_VIZ_INTERNAL = {
     '_id': 'internal_id',

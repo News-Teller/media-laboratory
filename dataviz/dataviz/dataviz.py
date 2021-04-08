@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 import re
 from typing import Optional, Any, Callable, Union
-from typing import List as ListT
+from typing import List
 import dill
 import pymongo
 from pymongo.errors import ConnectionFailure, PyMongoError
@@ -61,7 +61,8 @@ class DataViz(metaclass=Singleton):
             else:
                 raise ValueError('User not provided!')
 
-    def store(self, uid: str, title: str, app_factory: app_factory_type, locked: bool = False) -> bool:
+    def store(self, uid: str, title: str, app_factory: app_factory_type,
+        tags: List[str] = [], locked: bool = False) -> bool:
         """[summary]
 
         :param uid: Visualisation unique identifier (must match '^[a-zA-Z0-9_-]+$')
@@ -71,6 +72,8 @@ class DataViz(metaclass=Singleton):
         :type title: str
         :param app_factory: Function which returns a Dash app
         :type app_factory: `dataviz.dataviz.app_factory_type`
+        :param tags: List of tags (words) to ease the retrieval.
+        :type tags: List[str]
         :param locked: Set to `True` to lock this visualisation, defaults to False
         :type locked: bool, optional
         :raises
@@ -118,6 +121,7 @@ class DataViz(metaclass=Singleton):
             #'createdAt': TBD,
             #'updatedAt': TBD,
             'locked': locked,
+            'tags': tags,
         }
 
         if is_new:
@@ -135,8 +139,6 @@ class DataViz(metaclass=Singleton):
     def load(self, uid: str) -> Optional[dict]:
         """Inverse process of storing: retrieve a visualisation from the database
         to display it on the web.
-
-        Usually called from the server.
 
         :param name: visualisation's unique identifier returned from `store_visualisation()`
         :type name: str
@@ -252,7 +254,7 @@ class DataViz(metaclass=Singleton):
         except ConnectionFailure:
             return False
 
-    def get_my_visualisations(self) -> ListT[dict]:
+    def get_my_visualisations(self) -> List[dict]:
         """Get the visualizations created by this user.
 
         :return: List of visualizations made by the current user.
