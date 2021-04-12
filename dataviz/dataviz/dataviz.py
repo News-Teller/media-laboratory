@@ -151,6 +151,27 @@ class DataViz(metaclass=Singleton):
 
         return self._clean_record(record)
 
+    def restore(self, uid: str) -> bool:
+        """Restore the visualization using the previous stored data.
+        Works only once.
+
+        :param uid: visualisation's unique identifier
+        :type uid: str
+        :return: `True` if the visualisation was successfull
+        :rtype: bool
+        """
+        record = self._collection.find_one({'uid': uid, 'user': self.user})
+        if (not record) or (not record['dashapp_prev']):
+            return False
+
+        doc = {
+            'dashapp': record['dashapp_prev'],
+            'dashapp_prev': None
+        }
+        res = self._collection.update_one({'uid': uid, 'user': self.user}, {'$set': doc}, upsert=False)
+
+        return bool(res)
+
     def delete(self, uid: str, ask_confirm=True) -> bool:
         """Delete a visualization (only if not locked).
 

@@ -119,6 +119,31 @@ def test_load(mocker, record):
         assert res is None
 
 
+@pytest.mark.parametrize(
+    'record, expected',
+    [
+        (None, False),
+        ({'dashapp_prev': None}, False),
+        ({'dashapp_prev': FAKE_DB_RECORD['dashapp']}, True),
+    ]
+)
+def test_restore(mocker, record, expected):
+    mocker.patch('pymongo.collection.Collection.find_one', return_value=record)
+    mock_update_one = mocker.patch('pymongo.collection.Collection.update_one')
+    mock_update_one.return_value = True
+
+    dv = DataViz(user=FAKE_USER)
+    res = dv.restore(uid=FAKE_VIZ_PARAMS['uid'])
+
+    assert res == expected
+    if mock_update_one.called:
+        assert mock_update_one.call_args == mock.call(
+            {'uid': FAKE_VIZ_PARAMS['uid'], 'user': FAKE_USER},
+            {'$set': {'dashapp': record['dashapp_prev'], 'dashapp_prev': None}},
+            upsert=False
+        )
+
+
 def test_delete_no_record(mocker):
     mocker.patch('pymongo.collection.Collection.find_one', return_value=dict())
 
