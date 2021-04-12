@@ -4,26 +4,27 @@ import datetime
 
 from dataviz.dataviz import DataViz, DataVizException
 from dataviz.dataviz import os, pymongo, dill, bson, ConnectionFailure
-from tests.assets.simple_app import create_app
+from dataviz.serializer import dashapp_serializer, dashapp_deserializer
+from tests.assets.simple_app import app as simple_app
+
 
 FAKE_USER = 'test'
-FAKE_VIZ_PARAMS = {
+FAKE_DB_RECORD = {
+    '_id': 'test',
     'uid': 'test',
-    'title': 'test app',
-    'app_factory': create_app,
-    'locked': False,
-    'tags': ['tag1']
-}
-FAKE_VIZ_INTERNAL = {
-    '_id': 'internal_id',
-    'user': FAKE_USER,
-    'app_factory_prev': None,
+    'title': 'test',
+    'user': 'test',
+    'dashapp': dashapp_serializer(simple_app),
+    'dashapp_prev': None,
     'createdAt': datetime.datetime(2021, 1, 1, 0, 0, 0, 0),
     'updatedAt': datetime.datetime(2021, 1, 1, 0, 0, 0, 0),
+    'locked': False,
+    'tags': ['test'],
 }
-FAKE_VIZ_FULL = {**FAKE_VIZ_PARAMS, **FAKE_VIZ_INTERNAL}
-FAKE_DB_RECORD = FAKE_VIZ_FULL.copy()
-FAKE_DB_RECORD['app_factory'] = dill.dumps(create_app)
+FAKE_DB_RESULT = FAKE_DB_RECORD.copy()
+FAKE_DB_RESULT['dashapp'] = dashapp_deserializer(FAKE_DB_RECORD['dashapp'])
+FAKE_VIZ_PARAMS = {k:FAKE_DB_RESULT[k] for k  in ['uid', 'title', 'tags']}
+FAKE_VIZ_PARAMS['dash_app'] = simple_app
 
 
 @mock.patch.dict(os.environ, {'DB_USER': ''})
@@ -38,8 +39,8 @@ def test_no_user():
 @pytest.mark.parametrize(
     'params, exception, message',
     [
-        ({'uid': 'bad-uid!!', 'title': FAKE_VIZ_PARAMS['title'], 'app_factory': FAKE_VIZ_PARAMS['app_factory']}, ValueError, ''),
-        ({'uid': FAKE_VIZ_PARAMS['uid'], 'title': FAKE_VIZ_PARAMS['title'], 'app_factory': None}, ValueError, 'No app_factory provided!'),
+        ({'uid': 'bad-uid!!', 'title': FAKE_VIZ_PARAMS['title'], 'dash_app': FAKE_VIZ_PARAMS['dash_app']}, ValueError, ''),
+        ({'uid': FAKE_VIZ_PARAMS['uid'], 'title': FAKE_VIZ_PARAMS['title'], 'dash_app': None}, ValueError, 'Missing parameter'),
     ],
 )
 def test_store_raise(mocker, params, exception, message):
@@ -112,8 +113,8 @@ def test_load(mocker, record):
     res = dv.load(uid=FAKE_VIZ_PARAMS['uid'])
 
     if record:
-        assert res['app_factory'] == FAKE_VIZ_FULL['app_factory']
         assert ('_id' not in res) and ('user' not in res)
+        assert 'dashapp' in res
     else:
         assert res is None
 
@@ -261,7 +262,7 @@ def test_is_db_connected(mocker, side_effect, expected):
     'records, expected',
     [
         ([], []),
-        ([FAKE_DB_RECORD], [FAKE_VIZ_FULL]),
+        ([FAKE_DB_RECORD], [FAKE_DB_RESULT]),
     ],
 )
 def test_get_my_visualisations(mocker, records, expected):
@@ -272,16 +273,16 @@ def test_get_my_visualisations(mocker, records, expected):
 
     assert mock_find_one.call_args == mock.call({'user': FAKE_USER})
 
-    for i, record in enumerate(res):
+    for record in res:
         assert '_id' not in record
-        assert record['app_factory'] == expected[i]['app_factory']
+        assert 'dashapp' in record
 
 @pytest.mark.parametrize(
     'record, expected',
     [
         (None, None),
         (dict(), dict()),
-        (FAKE_DB_RECORD, FAKE_VIZ_FULL),
+        (FAKE_DB_RECORD, FAKE_DB_RESULT),
     ],
 )
 def test_clean_record(mocker, record, expected):
@@ -291,7 +292,7 @@ def test_clean_record(mocker, record, expected):
     if res:
         for record in res:
             assert ('_id' not in record) and ('user' not in record)
-            assert res['app_factory'] == expected['app_factory']
+            assert 'dashapp' in res
 
     else:
         assert res == expected

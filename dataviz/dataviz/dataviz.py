@@ -9,16 +9,15 @@ import dill
 import pymongo
 from pymongo.errors import ConnectionFailure, PyMongoError
 import bson
-from dash import Dash
-from jupyter_dash import JupyterDash
+import dash
+
+from .serializer import dashapp_serializer, dashapp_deserializer
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 logger.setLevel(os.getenv('LOG_LEVEL', 'WARNING').upper())
 
-# Dash application factory typing
-app_factory_type = Callable[[dict], Union[Dash, JupyterDash]]
 
 # regex for a valid uid
 UID_PATTERN = re.compile('^[a-zA-Z0-9_-]+$')
@@ -61,8 +60,7 @@ class DataViz(metaclass=Singleton):
             else:
                 raise ValueError('User not provided!')
 
-    def store(self, uid: str, title: str, app_factory: app_factory_type,
-        tags: List[str] = [], locked: bool = False) -> bool:
+    def store(self, uid: str, title: str, dash_app: dash.Dash, tags: List[str] = [], locked: bool = False) -> bool:
         """[summary]
 
         :param uid: Visualisation unique identifier (must match '^[a-zA-Z0-9_-]+$')
@@ -70,8 +68,8 @@ class DataViz(metaclass=Singleton):
         :param title: A title, more human readable than the `uid`.
             Can be different from the Dash app title.
         :type title: str
-        :param app_factory: Function which returns a Dash app
-        :type app_factory: `dataviz.dataviz.app_factory_type`
+        :param app: Dash applicatiomn
+        :type app: `dash.Dash`
         :param tags: List of tags (words) to ease the retrieval.
         :type tags: List[str]
         :param locked: Set to `True` to lock this visualisation, defaults to False
@@ -89,9 +87,8 @@ class DataViz(metaclass=Singleton):
 
             raise ValueError(error)
 
-        # app-factory cannot be empty
-        if not app_factory:
-            raise ValueError('No app_factory provided!')
+        if not (uid and title and dash_app):
+            raise ValueError('Missing parameter')
 
         is_new = True
 
@@ -116,20 +113,23 @@ class DataViz(metaclass=Singleton):
             'uid': uid,
             'title': title,
             'user': self.user,
-            'app_factory': bson.Binary(dill.dumps(app_factory)),
-            'app_factory_prev': None,
-            #'createdAt': TBD,
-            #'updatedAt': TBD,
+            'dashapp': dashapp_serializer(dash_app),
+            #'app_prev': ,
+            #'createdAt': ,
+            #'updatedAt': ,
             'locked': locked,
             'tags': tags,
         }
 
         if is_new:
+            doc['dashapp_prev'] = None
+
             now = datetime.utcnow()
             doc['createdAt'] = now
             doc['updatedAt'] = now
+
         else:
-            doc['app_factory_prev'] = record['app_factory']
+            doc['dashapp_prev'] = record['dashapp']
             doc['updatedAt'] = datetime.utcnow()
 
         res = self._collection.update_one({'uid': uid, 'user': self.user}, {'$set': doc}, upsert=True)
@@ -140,7 +140,7 @@ class DataViz(metaclass=Singleton):
         """Inverse process of storing: retrieve a visualisation from the database
         to display it on the web.
 
-        :param name: visualisation's unique identifier returned from `store_visualisation()`
+        :param name: visualisation's unique identifier
         :type name: str
         :return: All visualisation's information. `None` if no visualisation is found.
         :rtype: Optional[dict]
@@ -277,8 +277,8 @@ class DataViz(metaclass=Singleton):
         cleaned.pop('_id')
         cleaned.pop('user')
 
-        # Deserialize app_factory
-        cleaned['app_factory'] = dill.loads(record['app_factory'])
+        # Deserialize app
+        cleaned['dashapp'] = dashapp_deserializer(record['dashapp'])
 
         return cleaned
 
