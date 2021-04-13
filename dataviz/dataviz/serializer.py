@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 import dill
 import dash
 
@@ -16,7 +16,7 @@ def dashapp_serializer(app: dash.Dash) -> dict:
     buffer = {
         'config': {k: app.config.get(k) for k in app.config.keys()},
         'attrs': {
-            'index': app.index_string,
+            'index_string': app.index_string,
             'layout': app.layout,
             'css': app.css,
             'scripts': app.scripts,
@@ -40,7 +40,7 @@ def dashapp_deserializer(serialized: bytes, **kwargs) -> dash.Dash:
 
     # fixing url_base_pathname and requests_pathname_prefix ambiguity
     # https://github.com/plotly/dash/issues/364
-    if 'url_base_pathname' in buffer['config']:
+    if ('url_base_pathname' in buffer['config']) and (buffer['config']['url_base_pathname']):
         del buffer['config']['requests_pathname_prefix']
         del buffer['config']['routes_pathname_prefix']
 
@@ -53,3 +53,18 @@ def dashapp_deserializer(serialized: bytes, **kwargs) -> dash.Dash:
 
     return app
 
+def get_attr_from_serialized_dashapp(serialized: bytes, attr: str) -> Any:
+    """Get one attribute from a serialized dash app without build it entirely.
+
+    Valid attributes are: index_string, layout, css, scripts.
+
+    :param serialized: output obtained from `dash_serializer`
+    :type serialized: bytes
+    :param attr: attribute's name
+    :type attr: str
+    :return: attribute's value
+    :rtype: Any
+    """
+    buffer = dill.loads(serialized)
+
+    return buffer['attrs'].get(attr)
