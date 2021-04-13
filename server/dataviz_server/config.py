@@ -7,21 +7,19 @@ class Config:
     TESTING = False
     MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/')
     DEBUG = False
-    CACHE_CONFIG = {
-        'CACHE_TYPE': 'simple',
-        'CACHE_DEFAULT_TIMEOUT': 300
-    }
+    CACHE_TYPE = 'simple'
+    CACHE_DEFAULT_TIMEOUT = 300
 
 class LocalConfig(Config):
     ENV = 'development'
     DEBUG = True
-    CACHE_CONFIG = {'CACHE_TYPE': 'NullCache'}
+    CACHE_TYPE = 'NullCache'
 
 class TestConfig(Config):
     ENV = 'development'
     TESTING = True
     MONGODB_URI = 'mongodb://localhost:27017/'
-    CACHE_CONFIG = {'CACHE_TYPE': 'NullCache'}
+    CACHE_TYPE = 'NullCache'
 
 
 # dash-app server-side config to work with the dispatcher

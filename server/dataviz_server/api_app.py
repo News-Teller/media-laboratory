@@ -25,8 +25,8 @@ def create_app(collection: pymongo.collection.Collection, config: Optional[Confi
     # See http://flask.pocoo.org/docs/latest/config/
     app.config.from_object(config or {})
 
-    # See https://pythonhosted.org/Flask-Cache/
-    cache = Cache(app, config.CACHE_CONFIG if config else None)
+    # See https://flask-caching.readthedocs.io/en/latest/index.html
+    cache = Cache(app)
 
     # Setup cors headers to allow all domains
     # https://flask-cors.readthedocs.io/en/latest/
