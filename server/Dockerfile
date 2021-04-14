@@ -3,6 +3,10 @@ FROM python:3.8-slim
 
 LABEL maintainer="Marco Romanelli <marco.romanelli@epfl.ch>"
 
+# Install git, required for dataviz package
+RUN apt-get update
+RUN apt-get install -y git
+
 # Run as non-root user
 RUN useradd -ms /bin/bash appuser
 USER appuser
@@ -23,11 +27,11 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Copy the current directory contents into the container at /app
 COPY --chown=appuser:appuser gunicorn.conf.py .
-COPY --chown=appuser:appuser assets/ ./assets/
-COPY --chown=appuser:appuser app.py .
-COPY --chown=appuser:appuser database.py .
+COPY --chown=appuser:appuser dataviz_server/ ./dataviz_server/
 COPY --chown=appuser:appuser index.py .
 
 EXPOSE 8080
 
-CMD ["gunicorn", "--config", "gunicorn.conf.py", "index:server"]
+VOLUME /www
+
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "index:application"]

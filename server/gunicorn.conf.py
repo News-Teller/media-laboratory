@@ -31,7 +31,10 @@ num_cores = multiprocessing.cpu_count()
 workers = min(WEB_CONCURRENCY if WEB_CONCURRENCY else (2 * num_cores) + 1, 12)
 
 # https://docs.gunicorn.org/en/stable/settings.html#worker-class
-worker_class = 'gevent'
+worker_class = 'sync'
 
 # https://docs.gunicorn.org/en/stable/settings.html#keepalive
 keepalive = KEEPALIVE
+
+# https://docs.gunicorn.org/en/stable/settings.html#preload-app
+preload = True

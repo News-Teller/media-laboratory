@@ -9,22 +9,30 @@ volumes:
 services:
   server:
     build: .
+    container_name: server
     ports:
       - "8080:8080"
     networks:
       - net
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/
-      - CACHE_DEFAULT_TIMEOUT=1800 # 30 mins
+      - MONGODB_DB_NAME=medialab
+      - MONGODB_COL_NAME=viz
+      - ROOT_ASSETS_FOLDER=/www/assets
+    volumes:
+      - $PWD:/www
 
   mongodb:
     image: mongo:4.4
+    container_name: mongodb
     command: --quiet
     ports:
       - "27017:27017"
     networks:
       - net
     environment:
-      - MONGO_INITDB_DATABASE=notebook
+      - MONGO_INITDB_DATABASE=medialab
+      - MONGO_COLLECTION_NAME=viz
     volumes:
+      - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
       - mongodb_data:/data/db
