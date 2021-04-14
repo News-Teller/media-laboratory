@@ -13,6 +13,15 @@ def dashapp_serializer(app: dash.Dash) -> dict:
     :return: a byte representation of the app
     :rtype: dict
     """
+    # pickle callback functions from callback_map
+    cbregistry = dict()
+    for cid, cvalue in app.callback_map.items():
+        cbregistry[cid] = {
+            'inputs': cvalue['inputs'],
+            'state': cvalue['state'],
+            'callback': dill.dumps(cvalue['callback'])
+        }
+
     buffer = {
         'config': {k: app.config.get(k) for k in app.config.keys()},
         'attrs': {
@@ -20,6 +29,10 @@ def dashapp_serializer(app: dash.Dash) -> dict:
             'layout': app.layout,
             'css': app.css,
             'scripts': app.scripts,
+            '_callback_list': app._callback_list
+        },
+        'rebuild': {
+            'cbregistry': cbregistry
         }
     }
 
@@ -50,6 +63,15 @@ def dashapp_deserializer(serialized: bytes, **kwargs) -> dash.Dash:
     # apply attributes
     for key, value in buffer['attrs'].items():
         setattr(app, key, value)
+
+    # register callbacks
+    cbregistry = buffer['rebuild'].get('cbregistry', {})
+    for cid, cvalue in cbregistry.items():
+        app.callback_map[cid] = {
+            'inputs': cvalue['inputs'],
+            'state': cvalue['state'],
+            'callback': dill.loads(cvalue['callback'])
+        }
 
     return app
 
