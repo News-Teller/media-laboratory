@@ -9,8 +9,6 @@ from jupyter_dash import JupyterDash
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-# this is the only change -- use JupyterDash() instead of Dash()
-# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div(children=[
@@ -34,20 +32,33 @@ app.layout = html.Div(children=[
     ),
 
     html.Div([
-        dcc.Input(id='my-id', value='initial value', type='text'),
-        html.Div(id='my-div')
+        dcc.Input(id='my-input-1', value='callback test', type='text'),
+        html.Div(id='my-output-1')
+    ]),
+
+    html.Div([
+        dcc.Input(id='my-input-2', value='clientside callback test', type='text'),
+        html.Div(id='my-output-2')
     ])
 ])
 
 
 @app.callback(
-    Output(component_id='my-div', component_property='children'),
-    [Input(component_id='my-id', component_property='value')]
+    Output(component_id='my-output-1', component_property='children'),
+    [Input(component_id='my-input-1', component_property='value')]
 )
 def update_output_div(input_value):
-    global dsa
-    dsa.logger.info('my message')
     return 'You\'ve entered "{}"'.format(input_value)
+
+app.clientside_callback(
+    """
+    function(input_value) {
+        return "You've entered " + input_value;
+    }
+    """,
+    Output(component_id='my-output-2', component_property='children'),
+    Input(component_id='my-input-2', component_property='value')
+)
 
 # Run the server
 if __name__ == '__main__':

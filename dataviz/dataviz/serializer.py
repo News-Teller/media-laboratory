@@ -3,24 +3,24 @@ import dill
 import dash
 
 
+# highly inspired by dashserve's serializer
+# https://github.com/omegaml/dashserve/blob/master/dashserve/serializer.py
 def dashapp_serializer(app: dash.Dash) -> dict:
     """Serialize a Dash application.
-
-    Note: not all functionalities are copied.
 
     :param app: a dash application
     :type app: dash.Dash
     :return: a byte representation of the app
     :rtype: dict
     """
-    # pickle callback functions from callback_map
     cbregistry = dict()
     for cid, cvalue in app.callback_map.items():
         cbregistry[cid] = {
             'inputs': cvalue['inputs'],
-            'state': cvalue['state'],
-            'callback': dill.dumps(cvalue['callback'])
+            'state': cvalue['state']
         }
+        if 'callback' in cvalue:
+            cbregistry[cid]['callback'] = dill.dumps(cvalue['callback'])
 
     buffer = {
         'config': {k: app.config.get(k) for k in app.config.keys()},
@@ -29,17 +29,16 @@ def dashapp_serializer(app: dash.Dash) -> dict:
             'layout': app.layout,
             'css': app.css,
             'scripts': app.scripts,
-            '_callback_list': app._callback_list
+            '_callback_list': app._callback_list,
+            '_inline_scripts': app._inline_scripts
         },
-        'rebuild': {
-            'cbregistry': cbregistry
-        }
+        'cbregistry': cbregistry
     }
 
     return dill.dumps(buffer)
 
 def dashapp_deserializer(serialized: bytes, **kwargs) -> dash.Dash:
-    """Transform a dash application back after `dash_serializer`.
+    """Transform a dash application back after being serialized with `dash_serializer`.
 
     :param serialized: output obtained from `dash_serializer`
     :type serialized_app: bytes
@@ -65,13 +64,14 @@ def dashapp_deserializer(serialized: bytes, **kwargs) -> dash.Dash:
         setattr(app, key, value)
 
     # register callbacks
-    cbregistry = buffer['rebuild'].get('cbregistry', {})
+    cbregistry = buffer.get('cbregistry', {})
     for cid, cvalue in cbregistry.items():
         app.callback_map[cid] = {
             'inputs': cvalue['inputs'],
-            'state': cvalue['state'],
-            'callback': dill.loads(cvalue['callback'])
+            'state': cvalue['state']
         }
+        if 'callback' in cvalue:
+            app.callback_map[cid]['callback'] = dill.loads(cvalue['callback'])
 
     return app
 
