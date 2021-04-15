@@ -50,3 +50,8 @@ to suggest changes and [pull requests](https://github.com/News-Teller/media-labo
 to suggest implementations of changes.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution process.
+
+## License
+
+This software is licensed under the terms of the GNU GPLv3. See the [LICENSE](./LICENSE) file for more details.  
+Plotly Dash is Copyright (c) 2021 Plotly, Inc, and is not part of the Media-Laboratory project.
