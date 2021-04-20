@@ -1,6 +1,7 @@
 from typing import Optional, Any
 import dill
 import dash
+from .utils import _is_function
 
 
 # highly inspired by dashserve's serializer
@@ -48,7 +49,16 @@ def dashapp_deserializer(serialized: bytes, **kwargs) -> dash.Dash:
     buffer = dill.loads(serialized)
 
     # override with custom settings
-    buffer['config'].update(kwargs)
+    # custom settings can also contain functions, with the aim
+    # to modify the a config based on app current config value.
+    for key, value in kwargs.items():
+        if _is_function(value) and (key in buffer['config']):
+            buffer['config'][key] = value(buffer['config'].get(key))
+        else:
+            buffer['config'][key] = value
+
+    # override with custom settings
+    # buffer['config'].update(kwargs)
 
     # fixing url_base_pathname and requests_pathname_prefix ambiguity
     # https://github.com/plotly/dash/issues/364
