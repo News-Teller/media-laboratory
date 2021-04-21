@@ -11,4 +11,3 @@ dill==0.3.3
 flask_cors==3.0.10
 dash_bootstrap_components==0.11.3
 dash-simple-map==0.0.3
-dash-cytoscape==0.2.0

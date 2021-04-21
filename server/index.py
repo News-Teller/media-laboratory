@@ -14,7 +14,6 @@ import dash.dependencies
 import dash_bootstrap_components as dbc
 import dash_simple_map
 import dash_table
-import dash_cytoscape as cyto
 
 from dataviz_server import Dispatcher
 
