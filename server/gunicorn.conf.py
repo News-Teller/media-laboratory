@@ -19,6 +19,9 @@ KEEPALIVE = int(getenv('GUNICORN_KEEPALIVE', '4'))
 # https://docs.gunicorn.org/en/stable/settings.html#loglevel
 loglevel = getenv('GUNICORN_LOG_LEVEL', 'info')
 
+# https://docs.gunicorn.org/en/stable/settings.html#accesslog
+accesslog = '-'
+
 # https://docs.gunicorn.org/en/stable/settings.html#errorlog
 errorlog = '-'
 
