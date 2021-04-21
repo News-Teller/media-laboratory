@@ -28,12 +28,15 @@ def build_dashapp_server_configs(app_name: str) -> dict:
         'name': app_name,
         #'assets_folder':,
         'serve_locally': False,
-        'requests_pathname_prefix': f'/{app_name}/',
-        'suppress_callback_exceptions': True
+        'requests_pathname_prefix': f'/{app_name}/'
     }
 
-    if os.getenv('ROOT_ASSETS_FOLDER'):
-        config['assets_folder'] = os.path.join(os.getenv('ROOT_ASSETS_FOLDER'), app_name)
+    # override root asset folder, from local dev (client) to prod (server) location
+    # MAP_ASSETS_FOLDER=<current>:<to-change>
+    if os.getenv('MAP_ASSETS_FOLDER'):
+        old, new = os.getenv('MAP_ASSETS_FOLDER').split(':')
+        if old and new:
+            config['assets_folder'] = lambda assets_folder: assets_folder.replace(old, new)
 
     if os.getenv('DASH_ASSETS_EXTERNAL_PATH'):
         config['assets_external_path'] = os.getenv('DASH_ASSETS_EXTERNAL_PATH')

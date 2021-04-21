@@ -32,6 +32,6 @@ COPY --chown=appuser:appuser index.py .
 
 EXPOSE 8080
 
-VOLUME /www
+VOLUME /assets
 
 CMD ["gunicorn", "--config", "gunicorn.conf.py", "index:application"]

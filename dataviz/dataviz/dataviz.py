@@ -292,6 +292,7 @@ class DataViz(metaclass=Singleton):
         if not record:
             return record
 
+        # TODO! fix error 'str' object has no attribute 'copy'
         cleaned = record.copy()
 
         # Remove internal Mongo ID and user info
