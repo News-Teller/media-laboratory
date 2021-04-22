@@ -28,8 +28,6 @@ def dashapp_serializer(app: dash.Dash) -> dict:
         'attrs': {
             'index_string': app.index_string,
             'layout': app.layout,
-            'css': app.css,
-            'scripts': app.scripts,
             '_callback_list': app._callback_list,
             '_inline_scripts': app._inline_scripts
         },
