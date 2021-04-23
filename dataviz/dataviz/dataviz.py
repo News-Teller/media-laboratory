@@ -191,7 +191,7 @@ class DataViz(metaclass=Singleton):
 
         # Ask for a confirmation to prevent unwanted deletions
         if ask_confirm:
-            answer = input(f"Are you sure to delete viz '{uid}'?")
+            answer = input(f"Are you sure to delete viz '{uid}' (yes/no)?")
 
             if answer != 'yes':
                 return False
