@@ -1,9 +1,14 @@
+import os
 import re
+import logging
 from typing import Optional, List
 import flask
 
 
-VIZ_RECORD_REQUIRED_KEYS = ['uid', 'title', 'createdAt', 'tags']
+IS_GUNICORN_RUNNING = bool(os.getenv('SERVER_SOFTWARE', None))
+
+VIZ_RECORD_REQUIRED_KEYS = ['uid', 'title', 'createdAt', 'updatedAt', 'tags']
+
 
 def parse_tags(tags_parameter: str, allowed_pattern: Optional[re.Pattern] = None) -> list:
     """Parse the `tags` query parameter.
@@ -60,3 +65,12 @@ def parse_viz_records(records: List[dict]) -> Optional[dict]:
             pass
 
     return data
+
+def get_logger():
+    if IS_GUNICORN_RUNNING:
+        logger = logging.getLogger('gunicorn.error')
+
+    else:
+        logger = logging.getLogger('werkzeug')
+
+    return logger

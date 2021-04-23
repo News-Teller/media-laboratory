@@ -281,7 +281,7 @@ class DataViz(metaclass=Singleton):
         :return: List of visualizations made by the current user.
         :rtype: list of dict
         """
-        results = self._collection.find_one({'user': self.user})
+        results = self._collection.find({'user': self.user})
 
         if not results:
             return []
@@ -292,12 +292,14 @@ class DataViz(metaclass=Singleton):
         if not record:
             return record
 
-        # TODO! fix error 'str' object has no attribute 'copy'
         cleaned = record.copy()
 
         # Remove internal Mongo ID and user info
         cleaned.pop('_id')
         cleaned.pop('user')
+
+        # Remove dashapp_prev too, it's for internal use
+        cleaned.pop('dashapp_prev')
 
         # Deserialize app
         cleaned['dashapp'] = dashapp_deserializer(record['dashapp'])

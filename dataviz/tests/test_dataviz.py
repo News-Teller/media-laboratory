@@ -23,6 +23,7 @@ FAKE_DB_RECORD = {
 }
 FAKE_DB_RESULT = FAKE_DB_RECORD.copy()
 FAKE_DB_RESULT['dashapp'] = dashapp_deserializer(FAKE_DB_RECORD['dashapp'])
+FAKE_DB_RESULT.pop('dashapp_prev')
 FAKE_VIZ_PARAMS = {k:FAKE_DB_RESULT[k] for k  in ['uid', 'title', 'tags']}
 FAKE_VIZ_PARAMS['dash_app'] = simple_app
 
@@ -291,12 +292,12 @@ def test_is_db_connected(mocker, side_effect, expected):
     ],
 )
 def test_get_my_visualisations(mocker, records, expected):
-    mock_find_one = mocker.patch('pymongo.collection.Collection.find_one', return_value=records)
+    mock_find = mocker.patch('pymongo.collection.Collection.find', return_value=records)
 
     dv = DataViz(user=FAKE_USER)
     res = dv.get_my_visualisations()
 
-    assert mock_find_one.call_args == mock.call({'user': FAKE_USER})
+    assert mock_find.call_args == mock.call({'user': FAKE_USER})
 
     for record in res:
         assert '_id' not in record

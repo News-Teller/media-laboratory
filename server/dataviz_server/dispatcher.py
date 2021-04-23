@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import logging
+from datetime import datetime, timedelta
 from typing import Optional, Callable
 from werkzeug.wsgi import pop_path_info, peek_path_info, get_path_info
 from werkzeug.exceptions import NotFound, BadRequest
@@ -13,6 +14,7 @@ import dill
 from dataviz.serializer import dashapp_deserializer, get_attr_from_serialized_dashapp
 from .api_app import create_app as create_api_app
 from .config import Config, build_dashapp_server_configs
+from .utils import get_logger
 
 
 ALLOWED_APPNAME_PATTERN = os.getenv('ALLOWED_APPNAME_PATTERN', '^[a-zA-Z0-9_-]+$')
@@ -27,15 +29,19 @@ class Dispatcher:
     :type mongo_collection: pymongo.collection.Collection
     """
 
+    RETENTION_PERIOD_MIN = 60 # mins
+
     def __init__(self, mongo_collection: pymongo.collection.Collection):
         self.mongo_collection = mongo_collection
         self.default_app = NotFound()
         self.instances = {}
         self.api = create_api_app(mongo_collection, Config)
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.addHandler(logging.StreamHandler(stream=sys.stdout))
-        self.logger.setLevel(logging.INFO)
+        # time before refresh (fetching again from db) a dapp
+        self.retention_period = timedelta(
+            minutes=int(os.getenv('RETENTION_PERIOD_MIN', self.RETENTION_PERIOD_MIN)))
+
+        self.logger = get_logger()
 
     def __call__(self, environ, start_response):
         app = self.get_application(environ)
@@ -49,7 +55,7 @@ class Dispatcher:
         return app(environ, start_response)
 
     def get_application(self, environ) -> flask.Flask:
-        """Retrieve a WSGI application from the database.
+        """Retrieve a WSGI application.
 
         :param name: application's name (uid)
         :type name: str
@@ -60,28 +66,40 @@ class Dispatcher:
 
         if not name:
             return None
+
         elif name == 'api':
+            self.logger.info(f'Get special dapp "{name}"')
             return self.api
 
         if not re.match(name_pattern, name):
+            self.logger.info(f'"{name_pattern}" not in the allowed name pattern')
             return BadRequest()
 
-        app = self.instances.get(name)
+        instance = self.instances.get(name)
 
-        if app is None:
+        # if the retention period is expired, delete the app
+        if (instance and
+            Dispatcher.__is_main_page(environ) and
+            (datetime.utcnow() - instance['added']) > self.retention_period
+        ):
+            self.logger.info(f'Dapp "{name}" has expired')
+            instance = None
+            del self.instances[name]
+
+        if instance is None:
             app = self.__get_app_from_db(name)
 
-            self.instances[name] = app
+            if app:
+                instance = {
+                    'app': app,
+                    'added': datetime.utcnow()
+                }
 
-        # if the app is already stored, update the layout
-        # only if the request was for the main page
-        # eg: not for /example/_dash-layout
-        elif Dispatcher.__is_main_page(environ):
-            # Update app's layout
-            layout = self.__get_app_layout_from_db(name)
+                self.instances[name] = instance
 
-            if layout:
-                app.layout = layout
+                self.logger.info(f'Got dapp "{name}" from db')
+        else:
+            app = instance['app']
 
         return app
 
