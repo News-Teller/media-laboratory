@@ -11,6 +11,16 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
 
+figure = {
+    'data': [
+        {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
+        {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': u'Montréal'},
+    ],
+    'layout': {
+        'title': 'Dash Data Visualization'
+    }
+}
+
 app.layout = html.Div(children=[
     html.H1(children='Hello Dash'),
 
@@ -20,15 +30,7 @@ app.layout = html.Div(children=[
 
     dcc.Graph(
         id='example-graph',
-        figure={
-            'data': [
-                {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
-                {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': u'Montréal'},
-            ],
-            'layout': {
-                'title': 'Dash Data Visualization'
-            }
-        }
+        figure=figure,
     ),
 
     html.Div([
