@@ -20,6 +20,7 @@ FAKE_DB_RECORD = {
     'updatedAt': datetime.datetime(2021, 1, 1, 0, 0, 0, 0),
     'locked': False,
     'tags': ['test'],
+    'exported_as_html': False
 }
 FAKE_DB_RESULT = FAKE_DB_RECORD.copy()
 FAKE_DB_RESULT['dashapp'] = dashapp_deserializer(FAKE_DB_RECORD['dashapp'])
