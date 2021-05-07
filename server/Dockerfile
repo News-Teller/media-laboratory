@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.8-slim
+FROM python:3.7.3-slim
 
 LABEL maintainer="Marco Romanelli <marco.romanelli@epfl.ch>"
 
@@ -10,9 +10,6 @@ RUN apt-get install -y git
 # Run as non-root user
 RUN useradd -ms /bin/bash appuser
 USER appuser
-
-# Upgrade pip
-RUN pip install --upgrade pip
 
 # Set working directory
 RUN mkdir -p /home/appuser/app
