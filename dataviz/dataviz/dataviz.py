@@ -3,17 +3,13 @@ import sys
 import logging
 from datetime import datetime
 import re
-from typing import Optional, Any, Callable, Union
+from typing import Optional
 from typing import List
-import dill
 import pymongo
 from pymongo.errors import ConnectionFailure, PyMongoError
-import bson
 import dash
 
 from .serializer import dashapp_serializer, dashapp_deserializer
-from .utils import fig_to_html
-
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler(stream=sys.stdout))
@@ -66,9 +62,7 @@ class DataViz(metaclass=Singleton):
         title: str,
         dash_app: dash.Dash,
         tags: List[str] = [],
-        locked: bool = False,
-        export_as_html: bool = False,
-        figure: Union[object, dict] = None
+        locked: bool = False
         ) -> bool:
         """Store a visualisation onto the database.
 
@@ -83,12 +77,6 @@ class DataViz(metaclass=Singleton):
         :type tags: List[str]
         :param locked: Set to `True` to lock this visualisation, defaults to False
         :type locked: bool, optional
-        :param export_as_html: Set this to `True` to export the viz as an html file.
-            Note: currently only the Plotly.js figure can be exported and must be
-            provided with the `figure` parameter.
-        :type export_as_html: bool
-        :param figure: Plotly.js figure to export. Works with `export_as_html`
-        :type figure: Union[object, dict]
         :raises
             ValueError: If the provided `uid` is already used or not valid
             DataVizException: if the visualization is locked
@@ -133,8 +121,7 @@ class DataViz(metaclass=Singleton):
             #'createdAt': ,
             #'updatedAt': ,
             'locked': locked,
-            'tags': tags,
-            'exported_as_html': export_as_html
+            'tags': tags
         }
 
         if is_new:
@@ -149,16 +136,6 @@ class DataViz(metaclass=Singleton):
             doc['updatedAt'] = datetime.utcnow()
 
         res = self._collection.update_one({'uid': uid, 'user': self.user}, {'$set': doc}, upsert=True)
-
-        # HTML export of the visualization for plots (figure)
-        if export_as_html:
-            if not figure:
-                logger.warning('A figure must be provided to export as html!')
-            else:
-                path = os.getenv('HTML_EXPORTS_FOLDER', '')
-                filename = os.path.join(path, f'{uid}.html')
-
-                fig_to_html(fig=figure, file=filename, title=title)
 
         return bool(res)
 

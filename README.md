@@ -1,47 +1,38 @@
 # Media Laboratory project
 
-Data visualisation tool to share your visual analysis on the Web,
-allowing a smooth transition from experiments to production.
+Data visualisation tool to share your visual analysis on the Web.
 Build on top of [Dash](https://github.com/plotly/dash) and [Gunicorn](https://github.com/benoitc/gunicorn).
 
-## Overview
+# Overview
 
 The main use case proceed as follow:
 
-0. analyse data, transform it and finalise the best visualisation
+-   analyse data, transform it and finalise the best visualisation
+    using a Jupyter notebook
+-   create a Dash application to represent your visualisation and save it
+-   access it and share it using its unique identifier
 
-1. deploy the visualisation and obtain an ID
+## Deploy
 
-2. use the given ID to access the visualisation on the Web
-
-## Usage
-
-1. Clone this repo and copy `notebook` folder inside your Jupyter working directory.
-
-```bash
-cd media-laboratory
-cp -r notebook YOUR_JUPYTER_FOLDER
-```
-
-2. Run the server (development mode)
+Launch the whole stack using [Docker Compose](https://docs.docker.com/compose/):
 
 ```bash
-cd server
-pip install -r requirements.txt
-docker-compose up -d mongodb
-python index.py
-```
-
-Docker is used to spawn up a MongoDB instance. Feel free to omit that command if you want to use your own database.
-
-To run the server in production mode instead:
-
-```bash
-cd server
 docker-compose up -d
 ```
 
-3. Run the example notebook `example_notebook.ipynb`.
+-   JupyterHub will be available at `http://localhost:8000`
+-   visualizations will be available at `http://localhost:8080/<uid>`
+
+## Usage
+
+Access JupyterHub at `http://localhost:8000` and login with your credentials.
+Start creating your visualizations in the form of Dash applications
+and save them using the [`DataViz`](dataviz.md) python package (already included in the custom docker notebook image).  
+After saving, they'll be available on the webserver at `http://localhost:8080/<uid>`,
+with `uid` being the visualization unique identifier.
+
+Check the notebook `getting_started.ipynb` for a first overview and
+[`dataviz.md`](dataviz.md) for more information on the python package.
 
 ## Contributions
 
@@ -54,4 +45,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution process.
 ## License
 
 This software is licensed under the terms of the GNU GPLv3. See the [LICENSE](./LICENSE) file for more details.  
-Plotly Dash is Copyright (c) 2021 Plotly, Inc, and is not part of the Media-Laboratory project.
+Plotly Dash is Copyright (c) 2021 Plotly, Inc, and is not part of the Media Laboratory project.
