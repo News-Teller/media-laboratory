@@ -29,6 +29,17 @@ docker-compose up -d
 -   JupyterHub will be available at `http://localhost:8000`
 -   visualizations will be available at `http://localhost:8080/<uid>`
 
+### HTTPS
+
+`docker-compose.secure.yml` uses [Caddy](https://github.com/caddyserver/caddy)
+as reverse proxy to serve JupyterHub and the python webserver over HTTPS.
+You'll need to replace `.your_domain.com` inside [`caddy/Caddyfile`](caddy/Caddyfile) with your registered domain.  
+Then, append this second configuration to the base one:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.secure.yml up -d
+```
+
 ## Usage
 
 Access JupyterHub at `http://localhost:8000` and login with your credentials.
