@@ -14,10 +14,11 @@ The main use case proceed as follow:
 
 ## Deploy
 
-First, build the custom Jupyter notebook image:
+First, build the custom images:
 
 ```bash
 docker build -t medialab-notebook notebook
+docker-compose build
 ```
 
 Launch the whole stack using [Docker Compose](https://docs.docker.com/compose/):
