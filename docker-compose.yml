@@ -46,5 +46,5 @@ services:
       - MONGO_INITDB_DATABASE=medialab
       - MONGO_COLLECTION_NAME=viz
     volumes:
-      - ./mongdodb/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
+      - ./mongodb/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
       - mongodb-data:/data/db

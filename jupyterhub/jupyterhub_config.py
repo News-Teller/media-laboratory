@@ -31,5 +31,5 @@ notebook_dir = os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work'
 c.DockerSpawner.notebook_dir = notebook_dir
 c.DockerSpawner.volumes = {
     'jupyterhub-user-{username}': notebook_dir,
-    'media-laboratory_medialab-assets': '/home/jovyan/medialab-assets'
+    'media-laboratory_medialab-assets': '/home/jovyan/work/medialab-assets'
 }

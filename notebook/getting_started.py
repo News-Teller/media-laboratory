@@ -1,7 +1,7 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %% [markdown]
-# # DataViz
+# # Media Laboratory
 # The `dataviz` package allows you to store your Dash apps and make them accessible from the webserver. To know more of this webserver, check the `server` folder of this repo [here](https://github.com/News-Teller/media-laboratory/server).
 
 # Now, let's create a simple Dash app as an example.
@@ -57,7 +57,11 @@ app.layout = html.Div(children=[
 # Once it's store the app will be accessible at `http(s)://<server-name:port>/<uid>`.
 
 # %%
+# the `DataViz` helps manage (save,list,retrieve) the visualizations
 dz = dataviz.DataViz()
+
+# %%
+# save the viz created above
 dz.store(
     uid='example',
     title='example viz',
