@@ -1,0 +1,7 @@
+lab.your_domain.com {
+    reverse_proxy jupyterhub:8000
+}
+
+embed.your_domain.com {
+    reverse_proxy server:8080
+}

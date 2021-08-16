@@ -1,0 +1,50 @@
+version: "3.2"
+
+networks:
+  net:
+
+volumes:
+  jupyterhub-data:
+  mongodb-data:
+  medialab-assets:
+
+services:
+  jupyterhub:
+    container_name: jupyterhub
+    build: jupyterhub
+    ports:
+      - "8000:8000"
+    networks:
+      - net
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jupyterhub-data:/srv/jupyterhub
+
+  server:
+    container_name: server
+    build: server
+    ports:
+      - "8080:8080"
+    networks:
+      - net
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/
+      - MONGODB_DB_NAME=medialab
+      - MONGODB_COL_NAME=viz
+      - MAP_ASSETS_FOLDER=/home/jovyan/work/medialab-assets:/assets
+      - RETENTION_PERIOD_MIN=5
+    volumes:
+      - medialab-assets:/assets/:ro
+
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb
+    command: --quiet
+    networks:
+      - net
+    environment:
+      - MONGO_INITDB_DATABASE=medialab
+      - MONGO_COLLECTION_NAME=viz
+    volumes:
+      - ./mongodb/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro
+      - mongodb-data:/data/db

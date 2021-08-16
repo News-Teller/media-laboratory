@@ -1,0 +1,24 @@
+version: "3.2"
+
+networks:
+  media-laboratory_net:
+    external: true
+
+volumes:
+  caddy-data:
+  caddy-config:
+
+services:
+  reverse-proxy:
+    image: caddy:2.4.3
+    container_name: reverse-proxy
+    restart: unless-stopped
+    networks:
+      - media-laboratory_net
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
