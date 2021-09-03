@@ -3,6 +3,8 @@
 Data visualisation tool to share your visual analysis on the Web.
 Build on top of [Dash](https://github.com/plotly/dash) and [Gunicorn](https://github.com/benoitc/gunicorn).
 
+**See** [docs](./docs/README.md).
+
 # Overview
 
 The main use case proceed as follow:
@@ -45,12 +47,12 @@ docker-compose -f docker-compose.yml -f docker-compose.secure.yml up -d
 
 Access JupyterHub at `http://localhost:8000` and login with your credentials.
 Start creating your visualizations in the form of Dash applications
-and save them using the [`DataViz`](dataviz.md) python package (already included in the custom docker notebook image).  
+and save them using the [`DataViz`](docs/dataviz.md) python package (already included in the custom docker notebook image).  
 After saving, they'll be available on the webserver at `http://localhost:8080/<uid>`,
 with `uid` being the visualization unique identifier.
 
 Check the notebook `getting_started.ipynb` for a first overview and
-[`dataviz.md`](dataviz.md) for more information on the python package.
+[`dataviz.md`](docs/dataviz.md) for more information on the python package.
 
 ## Contributions
 
