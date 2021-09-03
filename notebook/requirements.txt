@@ -1,4 +1,4 @@
-git+https://github.com/News-Teller/media-laboratory@v2.0.0#egg=dataviz&subdirectory=dataviz
+git+https://github.com/News-Teller/media-laboratory#egg=dataviz&subdirectory=dataviz
 dash==1.19.0
 jupyter-dash==0.4.0
 pandas==1.3.1

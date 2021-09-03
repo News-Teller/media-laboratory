@@ -1,4 +1,4 @@
-git+https://github.com/News-Teller/media-laboratory@v2.0.0#egg=dataviz&subdirectory=dataviz
+git+https://github.com/News-Teller/media-laboratory#egg=dataviz&subdirectory=dataviz
 gunicorn==20.0.4
 gevent==21.1.2
 dash==1.19.0
