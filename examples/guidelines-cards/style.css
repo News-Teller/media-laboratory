@@ -1,0 +1,29 @@
+html,
+body {
+  font-family: "Open Sans", sans-serif;
+  color: #212121;
+  -moz-osx-font-smoothing: grayscale;
+}
+.wrapper {
+  width: 50%;
+  margin: 0 auto;
+}
+h1,
+h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+h1 {
+  font-size: 2.5rem;
+}
+h2 {
+  font-size: 1.8rem;
+}
+[data-toggle] {
+  color: #17a2b8;
+}
+.clientside-io {
+  display: none;
+}
