@@ -18,12 +18,14 @@ c.JupyterHub.spawner_class = "docker"
 c.JupyterHub.hub_ip = '0.0.0.0'
 c.JupyterHub.hub_connect_ip = 'jupyterhub'
 
-# c.DockerSpawner.image = 'jupyter/base-notebook'
 c.DockerSpawner.image = 'medialab-notebook'
 c.DockerSpawner.network_name = 'media-laboratory_net'
 
 # delete containers when the stop
-c.DockerSpawner.remove = True
+c.DockerSpawner.remove = False
+
+# Set default user interface to JupyterLab
+c.DockerSpawner.default_url = '/lab'
 
 # user data persistence
 # see https://jupyterhub-dockerspawner.readthedocs.io/en/latest/data-persistence.html
